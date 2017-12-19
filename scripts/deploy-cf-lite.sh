@@ -6,7 +6,7 @@ state_dir="${ENV_DIR}/$DIRECTOR-${ENV_TYPE}"
 cf_deployment=~/workspace/cf-deployment
 director_ip=192.168.50.6
 
-deployment_dir="$state_dir/deployments/kubo"
+deployment_dir="$state_dir/deployments/cf"
 mkdir -p "$deployment_dir"
 
 

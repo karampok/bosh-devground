@@ -28,5 +28,6 @@ kubectl config use-context kubo
 echo export KUBECONFIG="$deployment_dir/kuboconfig"
 
 cat <<EOF >${deployment_dir}/.envrc
+export BOSH_DEPLOYMENT=cfcr" > $deployment_dir/.envrc
 export KUBECONFIG="$deployment_dir/kuboconfig"
 EOF
