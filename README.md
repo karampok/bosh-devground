@@ -1,4 +1,4 @@
-# Prerequirement
+## Prerequirement
 
 Deployment release repositories to exist in `~/workspace`
 
@@ -9,25 +9,25 @@ $ echo $?
 > 0
 ```
 
-# Howto
+# TUTORIAL
 
 ```
-cat .envrc #Step 0. Configure environment
+cat .envrc # Step 0 - Configure environment
   > export DIRECTOR=k10s
   > export ENV_TYPE=virtualbox
   > export ENV_DIR=$PWD/environments
   > export PATH=$PATH:bin
 
-#Step 1. Create Credentials in the CPI
+# Step 1. Create Credentials in the CPI
 pre-cpi
 
-#Step 2 - Terraform the infrastructure
+# Step 2 - Terraform the infrastructure
 tform-me
 
 # Step 3 - Deploy bosh director
 bosh-me
 
-#Deploy cf or cfcr
+# Step 4 - Deploy cf or cfcr
  ./scripts/deploy-kubo-lite.sh
 ```
 
