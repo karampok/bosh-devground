@@ -34,3 +34,50 @@ For Virtualbox (bosh-lite) step 1 and step 2 are more or less dummy steps.
 > -  modprobe br_netfilter
 > +  modprobe br_netfilter || true
 ```
+
+
+# Environment Directory
+
+All the important information in order to access the setup (terraform,
+bosh-director, cf or cfcr deployments) are stored in the environment directory
+(`ENV_DIR`).  That content of folder should be encrypted or saved in private
+repository.
+
+```
+environments/
+└── k10s-virtualbox
+    ├── bosh
+    │   ├── debug.log
+    │   ├── env
+    │   ├── id_rsa_jumpbox
+    │   ├── input.args
+    │   ├── state.json
+    │   └── vars.yml
+    ├── deployments
+    │   └── kubo
+    │       ├── kubernetes.crt
+    │       └── kuboconfig
+    └── terraform
+        ├── terraform.tfstate
+        ├── terraform.tfstate.backup
+        └── tform.vars
+```
+
+## Access to the bosh director
+```
+$ direnv allow
+$ cd environments/k10s-virtualbox/bosh/
+	> direnv: loading .envrc
+	> direnv: export +BOSH_CA_CERT ...  +BOSH_ENVIRONMENT .. +CREDHUB_USER
+$ bosh ss
+	> Using environment '192.168.50.6' as client 'admin'
+	> Name                                         Version   OS             CPI  CID
+	> bosh-warden-boshlite-ubuntu-trusty-go_agent  3468.13*  ubuntu-trusty  -    f821b9ec-c7b3-44ce-63cf-85156a4f7d57
+	> (*) Currently deployed
+	> 1 stemcells
+	> Succeeded
+$ cd -
+$ bosh ss
+	> Expected non-empty Director URL
+	> Exit code 1
+```

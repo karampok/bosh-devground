@@ -14,7 +14,7 @@ bosh -n update-cloud-config cloud-configs/$ENV_TYPE/cloud-config.yml
 bosh update-runtime-config -n ops/empty-runtime.yml
 bosh -n -d cfcr deploy --no-redact \
   -o ops/kubo-local-release.yml \
-  $@ \
+  "$@" \
   "$kubo_deployment"/manifests/cfcr.yml
 
 export KUBECONFIG="$deployment_dir/kuboconfig"
