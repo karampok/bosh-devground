@@ -9,7 +9,7 @@ $ ls -d  ~/workspace/{bosh,cf,kubo}-deployment ~/workspace/kubo-release/
   > /Users/User/workspace/kubo-deployment
   > /Users/User/workspace/kubo-release
 $ echo $?
-> 0
+  > 0
 ```
 
 # TUTORIAL
@@ -25,16 +25,19 @@ cat .envrc # Step 0 - Configure environment
 pre-cpi
 
 # Step 2 - Terraform the infrastructure
+source ${ENV_DIR}/k10s-virtualbox/terraform/tform.vars
 tform-me
 
 # Step 3 - Deploy bosh director
+source ${ENV_DIR}/k10s-virtualbox/bosh/input.args
 bosh-me
 
 # Step 4 - Deploy cf or cfcr
+source ${ENV_DIR}/k10s-virtualbox/bosh/env
  ./scripts/deploy-kubo-lite.sh
 ```
 
-## Specific requirements for deploying CFCR in Virtualbox
+## Specific actions for deploying CFCR in Virtualbox
 
 For Virtualbox (bosh-lite) step 1 and step 2 are more or less dummy steps.
 
@@ -47,7 +50,7 @@ For Virtualbox (bosh-lite) step 1 and step 2 are more or less dummy steps.
 ```
 In kubo deployment, we need a small change.
 
-Note: it [deploys local cfcr](https://github.com/karampok/bosh-devground/blob/dc65f40ad0316d59f967fd725c29da375c0625d0/scripts/deploy-kubo-lite.sh#L16)
+Note: it [deploys local cfcr](https://github.com/karampok/bosh-devground/blob/master/scripts/deploy-kubo-lite.sh#L16)
 
 ```
 > diff --git a/jobs/flanneld/templates/bin/flanneld_ctl.erb b/jobs/flanneld/templates/bin/flanneld_ctl.erb
