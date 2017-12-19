@@ -21,7 +21,7 @@ cat .envrc # Step 0 - Configure environment
   > export ENV_DIR=$PWD/environments
   > export PATH=$PATH:bin
 
-# Step 1. Create Credentials in the CPI
+# Step 1 - Create Credentials in the CPI
 pre-cpi
 
 # Step 2 - Terraform the infrastructure
