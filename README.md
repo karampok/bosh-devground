@@ -4,7 +4,10 @@ Deployment release repositories to exist in `~/workspace`
 
 ```
 $ ls -d  ~/workspace/{bosh,cf,kubo}-deployment ~/workspace/kubo-release/
-> /Users/taakako1/workspace/bosh-deployment /Users/taakako1/workspace/cf-deployment   /Users/taakako1/workspace/kubo-deployment /Users/taakako1/workspace/kubo-release/
+  > /Users/User/workspace/bosh-deployment
+  > /Users/User/workspace/cf-deployment
+  > /Users/User/workspace/kubo-deployment
+  > /Users/User/workspace/kubo-release
 $ echo $?
 > 0
 ```
