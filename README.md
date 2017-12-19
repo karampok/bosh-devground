@@ -1,3 +1,14 @@
+# Prerequirement
+
+Deployment release repositories to exist in `~/workspace`
+
+```
+$ ls -d  ~/workspace/{bosh,cf,kubo}-deployment ~/workspace/kubo-release/
+> /Users/taakako1/workspace/bosh-deployment /Users/taakako1/workspace/cf-deployment   /Users/taakako1/workspace/kubo-deployment /Users/taakako1/workspace/kubo-release/
+$ echo $?
+> 0
+```
+
 # Howto
 
 ```
@@ -30,6 +41,7 @@ For Virtualbox (bosh-lite) step 1 and step 2 are more or less dummy steps.
 # cat /etc/hosts|grep master
 # 10.244.0.128 master.kubo
 
+# kubo deployment ([deploys local cfcr](https://github.com/karampok/bosh-devground/blob/dc65f40ad0316d59f967fd725c29da375c0625d0/scripts/deploy-kubo-lite.sh#L16)
 > diff --git a/jobs/flanneld/templates/bin/flanneld_ctl.erb b/jobs/flanneld/templates/bin/flanneld_ctl.erb
 > -  modprobe br_netfilter
 > +  modprobe br_netfilter || true
@@ -40,7 +52,7 @@ For Virtualbox (bosh-lite) step 1 and step 2 are more or less dummy steps.
 
 All the important information in order to access the setup (terraform,
 bosh-director, cf or cfcr deployments) are stored in the environment directory
-(`ENV_DIR`).  That content of folder should be encrypted or saved in private
+(`ENV_DIR`).  That content of that folder should be encrypted or saved in private
 repository.
 
 ```
