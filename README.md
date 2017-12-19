@@ -42,7 +42,8 @@ For Virtualbox (bosh-lite) step 1 and step 2 are more or less dummy steps.
 # 10.244.0.128 master.kubo
 
 ```
-In kubo deployment ([deploys local cfcr](https://github.com/karampok/bosh-devground/blob/dc65f40ad0316d59f967fd725c29da375c0625d0/scripts/deploy-kubo-lite.sh#L16)
+In kubo deployment, we need a small change
+Note: it [deploys local cfcr](https://github.com/karampok/bosh-devground/blob/dc65f40ad0316d59f967fd725c29da375c0625d0/scripts/deploy-kubo-lite.sh#L16)
 ```
 > diff --git a/jobs/flanneld/templates/bin/flanneld_ctl.erb b/jobs/flanneld/templates/bin/flanneld_ctl.erb
 > -  modprobe br_netfilter
