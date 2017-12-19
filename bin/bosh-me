@@ -1,0 +1,64 @@
+#!/bin/bash
+set -euo pipefail
+
+
+state_dir="${ENV_DIR}/$DIRECTOR-${ENV_TYPE}"
+bosh_deployment=~/workspace/bosh-deployment
+
+export BOSH_LOG_LEVEL=debug
+export BOSH_LOG_PATH="$state_dir"/bosh/debug.log
+
+execute() {
+  echo "$action"-ing bosh env at "$ENV_TYPE" with name "$DIRECTOR"
+  bosh "$action" \
+    --vars-store $state_dir/bosh/vars.yml \
+    --state $state_dir/bosh/state.json \
+    -o "$bosh_deployment/$ENV_TYPE/cpi.yml" \
+    -o "$bosh_deployment/jumpbox-user.yml" \
+    -o "$bosh_deployment/uaa.yml" \
+    -o "$bosh_deployment/credhub.yml" \
+    -o "$bosh_deployment/local-dns.yml" \
+    -v director_name="$DIRECTOR" \
+    --vars-env=CPI ${CPI_EXTRA_ARGS:-} \
+    "$bosh_deployment/bosh.yml"
+
+  after-"$action"
+
+}
+
+after-create-env() {
+  rm -f  ${state_dir}/bosh/id_rsa_jumpbox
+  bosh int ${state_dir}/bosh/vars.yml --path /jumpbox_ssh/private_key > ${state_dir}/bosh/id_rsa_jumpbox
+  chmod 400 ${state_dir}/bosh/id_rsa_jumpbox
+
+  cat <<EOF >${state_dir}/bosh/env
+export BOSH_CLIENT=admin
+BOSH_CLIENT_SECRET=\$(bosh int ${state_dir}/bosh/vars.yml --path /admin_password)
+export BOSH_CLIENT_SECRET
+export BOSH_CA_CERT=\$(bosh int ${state_dir}/bosh/vars.yml --path /director_ssl/ca)
+export BOSH_ENVIRONMENT=${CPI_external_ip}
+export BOSH_GW_USER=jumpbox
+export BOSH_GW_HOST="${CPI_external_ip}"
+export BOSH_GW_PRIVATE_KEY=${state_dir}/bosh/id_rsa_jumpbox
+export CREDHUB_SERVER="https://${CPI_external_ip}:8844"
+export CREDHUB_USER="credhub-cli"
+export CREDHUB_PASS=\$(bosh int ${state_dir}/bosh/vars.yml --path /credhub_cli_password)
+export CREDHUB_CA_CERT=\$(bosh int ${state_dir}/bosh/vars.yml --path /uaa_ssl/ca;bosh int ${state_dir}/bosh/vars.yml --path /credhub_tls/ca)
+#credhub login -u \$CREDHUB_USER -p \$CREDHUB_PASS
+EOF
+  ln -s "${state_dir}/bosh/env" "${state_dir}/bosh/.envrc" || true
+  echo "source ${state_dir}/bosh/env"
+  echo "#or cd ${state_dir}"
+  echo "ssh jumpbox@${CPI_external_ip} -i ${state_dir}/bosh/id_rsa_jumpbox"
+  echo "sudo route add -net 10.244.0.0/16 192.168.50.6 #if bosh-lite"
+
+}
+
+after-delete-env() {
+  echo  "delete bosh-env sourceable file..."
+  rm -rf "${state_dir}/bosh" || true
+  rm -f "${state_dir}/.envrc" || true
+}
+
+action=${1:-create-env} #"usage: $0  <create-env|delete-env>"
+execute "$action"

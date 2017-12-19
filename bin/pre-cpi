@@ -1,0 +1,69 @@
+#!/bin/bash
+set -euo pipefail
+
+state_dir="${ENV_DIR}/$DIRECTOR-${ENV_TYPE}/terraform"
+
+execute-add() {
+  echo "$action"-ing creds for $ENV_TYPE
+  mkdir -p "${state_dir}"
+  after-"$action"-"$ENV_TYPE"
+}
+
+execute-remove() {
+  after-"$action"-"$ENV_TYPE"
+  rm  -rf "${state_dir}"
+}
+
+
+after-add-virtualbox() {
+  cat <<EOF >"${state_dir}/tform.vars"
+export TF_VAR_prefix="${DIRECTOR}"
+EOF
+
+  echo  "source ${state_dir}/tform.vars"
+}
+
+after-remove-virtualbox() {
+  :
+}
+
+
+after-add-gcp() {
+  project_id=$(gcloud config get-value project)
+  service_account_email=$DIRECTOR-terraform@${project_id}.iam.gserviceaccount.com
+  allow_ip=$(curl -s ipinfo.io/ip)/32
+
+  gcloud iam service-accounts create $DIRECTOR-terraform  --display-name $(gcloud config get-value account) || true
+
+  if [ ! -f  "${state_dir}/gcp-tform.key.json" ]; then
+    gcloud iam service-accounts keys create "${state_dir}/gcp-tform.key.json" \
+    --iam-account ${service_account_email}
+  fi
+
+  gcloud projects add-iam-policy-binding ${project_id} \
+      --member serviceAccount:${service_account_email} \
+      --role roles/owner
+
+  cat <<EOF >"${state_dir}/tform.vars"
+export TF_VAR_prefix="${DIRECTOR}"
+export TF_VAR_project_id="${project_id}"
+export TF_VAR_allowed_ips="${allow_ip}"
+export TF_VAR_service_account_email="${service_account_email}"
+TF_VAR_service_account_key_file="${state_dir}/gcp-tform.key.json"
+export TF_VAR_service_account_key_file
+export TF_VAR_ssh_user="$(whoami)"
+export TF_VAR_ssh_pub_key="$(ssh-add -L| head -1)"
+EOF
+
+  echo  "source ${state_dir}/tform.vars"
+}
+
+after-remove-gcp() {
+  project_id=$(gcloud config get-value project)
+  export service_account_email=${DIRECTOR}-terraform@${project_id}.iam.gserviceaccount.com
+  echo  "deleting account in gcp"
+  gcloud iam service-accounts delete ${service_account_email}
+}
+
+action=${1:-add} #"usage: $0 <add|remove>"
+execute-"$action"

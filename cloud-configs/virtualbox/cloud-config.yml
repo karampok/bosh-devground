@@ -1,0 +1,44 @@
+---
+azs:
+- name: z1
+- name: z2
+- name: z3
+
+compilation:
+  az: z1
+  workers: 6
+  reuse_compilation_vms: true
+  vm_type: default
+  network: default
+
+networks:
+- name: default
+  subnets:
+  - azs: [z1, z2, z3]
+    cloud_properties:
+      name: random
+    gateway: 10.244.0.1
+    range: 10.244.0.0/20
+    reserved:
+    - 10.244.0.1
+    static:
+    - 10.244.0.2 - 10.244.0.127
+    - 10.244.1.0 - 10.244.1.127
+    - 10.244.2.0 - 10.244.2.127
+    - 10.244.3.0 - 10.244.3.127
+    dns:
+    - 8.8.8.8
+
+vm_types:
+- name: default
+- name: common
+- name: small
+- name: small-highmem
+
+disk_types:
+- name: default
+  disk_size: 3000
+- name: 10240
+  disk_size: 10_240
+- name: 5120
+  disk_size: 5_120
