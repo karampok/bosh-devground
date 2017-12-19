@@ -76,6 +76,7 @@ environments/
 ```
 
 ## Access to the bosh director
+Either by `cd`-ing to the bosh directory
 ```
 $ direnv allow
 $ cd environments/k10s-virtualbox/bosh/
@@ -92,4 +93,48 @@ $ cd -
 $ bosh ss
 	> Expected non-empty Director URL
 	> Exit code 1
+```
+
+Or by simply sourcing the `.envrc` file of the folder 
+
+```
+source ${ENV_DIR}/k10s-virtualbox/bosh/.envrc
+```
+
+## Access to a deployment
+
+In order to access to a CFCR deployment, either `cd` to the deployment folder
+
+```
+$ cd environments/k10s-virtualbox/deployments/kubo/
+  > direnv: error .envrc is blocked. Run `direnv allow` to approve its content.
+$ direnv allow
+  > direnv: loading .envrc
+  > direnv: export +KUBECONFIG
+$ kubectl get nodes
+  > NAME           STATUS    ROLES     AGE       VERSION
+  > 10.244.0.129   Ready     <none>    1h        v1.8.4
+  > 10.244.0.130   Ready     <none>    1h        v1.8.4
+  > 10.244.0.131   Ready     <none>    1h        v1.8.4
+```
+
+Or source/export the kubeconfig 
+```
+export KUBECONFIG=${ENV_DIR}/k10s-virtualbox/deployments/kubo/kuboconfig
+```
+
+
+# Clean up 
+Every bin has a clean up counterpart
+
+```
+source ${ENV_DIR}/k10s-virtualbox/bosh/.envrc
+bosh -n delete-deployment -d cfcr
+
+source ${ENV_DIR}/k10s-virtualbox/bosh/input.args
+bosh-me delete-env
+
+tform-me destroy #removes the resources created with terraform
+
+pre-cpi remove #remove credentials needed only for the setup
 ```

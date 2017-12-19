@@ -26,3 +26,7 @@ kubectl config set-credentials "kubo-admin" --token=${KUBERNETES_PWD}
 kubectl config set-context kubo --cluster=kubo --user=kubo-admin
 kubectl config use-context kubo
 echo export KUBECONFIG="$deployment_dir/kuboconfig"
+
+cat <<EOF >${deployment_dir}/.envrc
+export KUBECONFIG="$deployment_dir/kuboconfig"
+EOF
