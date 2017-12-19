@@ -7,7 +7,7 @@ cat .envrc #Step 0. Configure environment
   > export ENV_DIR=$PWD/environments
   > export PATH=$PATH:bin
 
-#Create Credentials in the CPI
+#Step 1. Create Credentials in the CPI
 pre-cpi
 
 #Step 2 - Terraform the infrastructure
@@ -19,9 +19,10 @@ bosh-me
 #Deploy cf or cfcr
  ./scripts/deploy-kubo-lite.sh
 ```
-# Step 4 - Deploy Software
 
 ## Prereqs for deploying CFCR Virtualbox
+
+For Virtualbox (bosh-lite) step 1 and step 2 are more or less dummy steps.
 
 ```
 #sudo route add -net 10.244.0.0/16 192.168.50.6
