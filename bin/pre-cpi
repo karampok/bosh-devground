@@ -60,8 +60,12 @@ EOF
 
 after-remove-gcp() {
   project_id=$(gcloud config get-value project)
-  export service_account_email=${DIRECTOR}-terraform@${project_id}.iam.gserviceaccount.com
+  service_account_email=${DIRECTOR}-terraform@${project_id}.iam.gserviceaccount.com
+
   echo  "deleting account in gcp"
+  gcloud projects remove-iam-policy-binding ${project_id} \
+      --member serviceAccount:${service_account_email} \
+      --role roles/owner
   gcloud iam service-accounts delete ${service_account_email}
 }
 

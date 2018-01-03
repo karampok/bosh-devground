@@ -31,7 +31,6 @@ networks:
 
 vm_types:
 - name: default
-- name: common
 - name: small
 - name: small-highmem
 
