@@ -11,6 +11,7 @@ export BOSH_LOG_PATH="$state_dir"/bosh/debug.log
 execute() {
   echo "$action"-ing bosh env at "$ENV_TYPE" with name "$DIRECTOR"
   bosh "$action" \
+    -v director_name="$DIRECTOR" \
     --vars-store $state_dir/bosh/vars.yml \
     --state $state_dir/bosh/state.json \
     -o "$bosh_deployment/$ENV_TYPE/cpi.yml" \
@@ -18,7 +19,6 @@ execute() {
     -o "$bosh_deployment/uaa.yml" \
     -o "$bosh_deployment/credhub.yml" \
     -o "$bosh_deployment/local-dns.yml" \
-    -v director_name="$DIRECTOR" \
     --vars-env=CPI ${CPI_EXTRA_ARGS:-} \
     "$bosh_deployment/bosh.yml"
 

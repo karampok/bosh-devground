@@ -1,5 +1,4 @@
 variable "project_id" {}
-
 variable "service_account_key_file" {}
 variable "service_account_email" {}
 

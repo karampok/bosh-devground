@@ -21,7 +21,7 @@ export KUBECONFIG="$deployment_dir/kuboconfig"
 credhub login -u ${CREDHUB_USER} -p ${CREDHUB_PASS} -s ${CREDHUB_SERVER}
 bosh int <(credhub get -n "/$DIRECTOR/cfcr/tls-kubernetes" ) --path=/value/ca > "$deployment_dir/kubernetes.crt"
 KUBERNETES_PWD=$(bosh int <(credhub get -n "/$DIRECTOR/cfcr/kubo-admin-password" --output-json) --path=/value)
-kubectl config set-cluster kubo --server https://master.kubo:8443 --embed-certs=true --certificate-authority="$deployment_dir/kubernetes.crt"
+kubectl config set-cluster kubo --server https://kubernetes:8443 --embed-certs=true --certificate-authority="$deployment_dir/kubernetes.crt"
 kubectl config set-credentials "kubo-admin" --token=${KUBERNETES_PWD}
 kubectl config set-context kubo --cluster=kubo --user=kubo-admin
 kubectl config use-context kubo

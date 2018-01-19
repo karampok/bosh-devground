@@ -8,6 +8,9 @@ bosh_deployment=~/workspace/bosh-deployment
 execute() {
   echo "$action"-ing "$DIRECTOR" terraform resources
   cd "infrastructure/$ENV_TYPE"
+
+  allow_ip=$(curl -s ipinfo.io/ip)/32
+  export TF_VAR_allowed_ips="${allow_ip}"
   terraform init
   terraform "$action" \
 	  -state "${state_dir}/terraform/terraform.tfstate"
@@ -34,7 +37,7 @@ export CPI_outbound_network_name=NatNetwork
 EOF
 }
 
-after-destroy-virtualbox() {
+after-destroy-aws() {
   rm -rf ${state_dir}/terraform
 }
 
@@ -66,8 +69,30 @@ EOF
   # echo "export BOSH_ALL_PROXY=socks5://localhost:5000"
 }
 
-after-destroy-gcp() {
-  rm -rf ${state_dir}/terraform
+
+after-apply-aws() {
+  arg1="-o ${bosh_deployment}/external-ip-with-registry-not-recommended.yml"
+  arg2="-o ${bosh_deployment}/external-ip-not-recommended-uaa.yml"
+  arg3="-o ops/external-ip-not-recommended-credhub.yml"
+
+  cat <<EOF >${state_dir}/bosh/input.args
+export CPI_EXTRA_ARGS=" $arg1 $arg2 $arg3 "
+export CPI_access_key_id=$(tfstate access_key_id)
+export CPI_secret_access_key=$(tfstate secret_access_key)
+export CPI_default_key_name=$(tfstate key_name)
+export CPI_private_key=${state_dir}/creds/bosh_ssh_key
+export CPI_az=$(tfstate zone)
+export CPI_region=$(tfstate region)
+export CPI_subnet_id=$(tfstate private_subnet_id)
+export CPI_external_ip=$(tfstate external_ip)
+export CPI_internal_ip=$(tfstate internal_ip)
+export CPI_internal_gw=$(tfstate internal_gw)
+export CPI_internal_cidr=$(tfstate internal_cidr)
+export CPI_default_security_groups=[$(tfstate security_group)]
+export CPI_dns_recursor_ip=$(tfstate internal_ip),8.8.8.8
+export CPI_tags='[director]'
+EOF
+
 }
 
 tfstate() {

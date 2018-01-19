@@ -1,12 +1,13 @@
 #!/bin/bash
 set -euo pipefail
 
-state_dir="${ENV_DIR}/$DIRECTOR-${ENV_TYPE}/terraform"
+state_dir="${ENV_DIR}/$DIRECTOR-${ENV_TYPE}"
+mkdir -p "${state_dir}"
+#mkdir -p "${state_dir}"{director,terraform,creds}
 
 execute-add() {
-  echo "$action"-ing creds for $ENV_TYPE
-  mkdir -p "${state_dir}"
   after-"$action"-"$ENV_TYPE"
+  echo  "source ${state_dir}/tform.vars"
 }
 
 execute-remove() {
@@ -15,12 +16,49 @@ execute-remove() {
 }
 
 
+after-add-aws() {
+  user_name=$DIRECTOR-terraform
+  aws iam create-user --user-name "$user_name" || true
+  aws iam put-user-policy --user-name "$user_name" \
+	  --policy-name "$user_name"-policy \
+	  --policy-document "$(cat infrastructure/aws/policy.json)"
+  if [ ! -f  "${state_dir}/aws-key.json" ]; then
+    aws iam create-access-key --user-name "$user_name" > "${state_dir}/aws-key.json"
+  fi
+
+  ssh_bosh_path=${state_dir}/bosh_key
+  if [ ! -f   ${state_dir}/bosh_ssh_key ]
+  then
+      ssh-keygen -t rsa -C bosh_key -P '' -f ${state_dir}/bosh_ssh_key -b 2048
+      chmod 400 ${state_dir}/bosh_ssh_key
+  fi
+
+  cat <<EOF >"${state_dir}/tform.vars"
+export TF_VAR_prefix="${DIRECTOR}"
+export TF_VAR_region=eu-central-1
+export TF_VAR_zone=eu-central-1a
+export TF_VAR_access_key=$(cat "${state_dir}/aws-key.json"| jq '.AccessKey.AccessKeyId' -r)
+export TF_VAR_secret_key=$(cat "${state_dir}/aws-key.json"| jq '.AccessKey.SecretAccessKey' -r)
+export TF_VAR_bosh_ssh_pub_key="$(cat ${state_dir}/bosh_ssh_key.pub)"
+export TF_VAR_user_ssh_pub_key="$(ssh-add -L| head -1|awk '{print $1" "$2}')"
+EOF
+}
+
+after-remove-aws() {
+  user_name=$DIRECTOR-terraform
+
+  aws iam delete-user-policy --user-name "$user_name" \
+      --policy-name "$user_name"-policy || true
+  aws iam delete-access-key --user-name "$user_name" \
+      --access-key-id $(cat "${state_dir}/creds/aws-key.json"| jq '.AccessKey.AccessKeyId' -r)
+  aws iam delete-user --user-name "$user_name" ||true
+}
+
+
 after-add-virtualbox() {
   cat <<EOF >"${state_dir}/tform.vars"
 export TF_VAR_prefix="${DIRECTOR}"
 EOF
-
-  echo  "source ${state_dir}/tform.vars"
 }
 
 after-remove-virtualbox() {
@@ -31,7 +69,6 @@ after-remove-virtualbox() {
 after-add-gcp() {
   project_id=$(gcloud config get-value project)
   service_account_email=$DIRECTOR-terraform@${project_id}.iam.gserviceaccount.com
-  allow_ip=$(curl -s ipinfo.io/ip)/32
 
   gcloud iam service-accounts create $DIRECTOR-terraform  --display-name $(gcloud config get-value account) || true
 
@@ -47,7 +84,6 @@ after-add-gcp() {
   cat <<EOF >"${state_dir}/tform.vars"
 export TF_VAR_prefix="${DIRECTOR}"
 export TF_VAR_project_id="${project_id}"
-export TF_VAR_allowed_ips="${allow_ip}"
 export TF_VAR_service_account_email="${service_account_email}"
 TF_VAR_service_account_key_file="${state_dir}/gcp-tform.key.json"
 export TF_VAR_service_account_key_file
@@ -55,7 +91,6 @@ export TF_VAR_ssh_user="$(whoami)"
 export TF_VAR_ssh_pub_key="$(ssh-add -L| head -1)"
 EOF
 
-  echo  "source ${state_dir}/tform.vars"
 }
 
 after-remove-gcp() {
@@ -70,4 +105,5 @@ after-remove-gcp() {
 }
 
 action=${1:-add} #"usage: $0 <add|remove>"
+echo "$action"-ing creds for $ENV_TYPE
 execute-"$action"
