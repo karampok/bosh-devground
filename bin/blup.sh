@@ -17,7 +17,7 @@ export CPI_outbound_network_name=NatNetwork
 bosh create-env \
   -v director_name=lite \
   --vars-store $state_dir/bosh-vars.yml \
-  --state $state_dir/bosh/bosh-state.json \
+  --state $state_dir/bosh-state.json \
   -o "$bosh_deployment/virtualbox/cpi.yml" \
   -o "$bosh_deployment/jumpbox-user.yml" \
   -o "$bosh_deployment/uaa.yml" \
