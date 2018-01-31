@@ -42,7 +42,7 @@ $ kubectl get nodes
   > 10.244.0.131   Ready     <none>    1h        v1.8.4
 ```
 
-## Clean up 
+## Clean up
 
 ```
 rm -rf $PWD/environments/bosh-lite
