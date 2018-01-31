@@ -40,10 +40,10 @@ data "aws_ami" "ubuntu" {
 }
 
 
-variable "ssh_pub_key" {}
+variable "user_ssh_pub_key" {}
 resource "aws_key_pair" "bastion_key_pair" {
   key_name = "${var.prefix}-user"
-  public_key = "${var.ssh_pub_key}"
+  public_key = "${var.user_ssh_pub_key}"
 }
 
 

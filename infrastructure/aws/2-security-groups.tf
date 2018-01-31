@@ -16,22 +16,30 @@ resource "aws_security_group" "bosh-sg" {
     from_port   = 6868
     to_port     = 6868
     protocol    = "tcp"
-		cidr_blocks = ["${var.allowed_ips}"]
+		cidr_blocks = ["${var.allowed_ips}","${aws_eip.boshdirector.public_ip}/32"]
   }
 
 	ingress {
 		from_port   = 25555
 		to_port     = 25555
 		protocol    = "tcp"
-		cidr_blocks = ["${var.allowed_ips}"]
+		cidr_blocks = ["${var.allowed_ips}","${aws_eip.boshdirector.public_ip}/32"]
 	}
 
 	ingress {
 		from_port   = 22
 		to_port     = 22
 		protocol    = "tcp"
-		cidr_blocks = ["${var.allowed_ips}"]
+		cidr_blocks = ["${var.allowed_ips}","${aws_eip.boshdirector.public_ip}/32"]
 	}
+
+  ingress {
+		from_port   = 8443
+		to_port     = 8443
+		protocol    = "tcp"
+		cidr_blocks = ["${var.allowed_ips}","${aws_eip.boshdirector.public_ip}/32"]
+	}
+
 
 
 	# outbound internet access

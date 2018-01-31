@@ -14,6 +14,7 @@ bosh -n update-cloud-config cloud-configs/virtualbox/cloud-config.yml
 
 bosh -n -d cfcr deploy --no-redact \
   -o ops/kubo-local-release.yml \
+  -o ops/boshlite-cloud-provider.yml \
   "$@" \
   "$kubo_deployment"/manifests/cfcr.yml
 

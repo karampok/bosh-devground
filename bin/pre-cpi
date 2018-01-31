@@ -1,9 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-state_dir="${ENV_DIR}/$DIRECTOR-${ENV_TYPE}"
+state_dir="${ENV_DIR}/$DIRECTOR-${ENV_TYPE}/creds"
 mkdir -p "${state_dir}"
-#mkdir -p "${state_dir}"{director,terraform,creds}
 
 execute-add() {
   after-"$action"-"$ENV_TYPE"
@@ -17,7 +16,7 @@ execute-remove() {
 
 
 after-add-aws() {
-  user_name=$DIRECTOR-terraform
+  user_name=$DIRECTOR-bbl
   aws iam create-user --user-name "$user_name" || true
   aws iam put-user-policy --user-name "$user_name" \
 	  --policy-name "$user_name"-policy \
@@ -41,28 +40,25 @@ export TF_VAR_access_key=$(cat "${state_dir}/aws-key.json"| jq '.AccessKey.Acces
 export TF_VAR_secret_key=$(cat "${state_dir}/aws-key.json"| jq '.AccessKey.SecretAccessKey' -r)
 export TF_VAR_bosh_ssh_pub_key="$(cat ${state_dir}/bosh_ssh_key.pub)"
 export TF_VAR_user_ssh_pub_key="$(ssh-add -L| head -1|awk '{print $1" "$2}')"
+
+ export BBL_ENV_NAME=${DIRECTOR}
+ export BBL_STATE_DIR=${state_dir}
+ export BBL_IAAS=aws
+ export BBL_AWS_ACCESS_KEY_ID=$(cat "${state_dir}/aws-key.json"| jq '.AccessKey.AccessKeyId' -r)
+ export BBL_AWS_SECRET_ACCESS_KEY=$(cat "${state_dir}/aws-key.json"| jq '.AccessKey.SecretAccessKey' -r)
+ export BBL_AWS_REGION=eu-central-1
+
 EOF
 }
 
 after-remove-aws() {
-  user_name=$DIRECTOR-terraform
+  user_name=$DIRECTOR-bbl
 
   aws iam delete-user-policy --user-name "$user_name" \
       --policy-name "$user_name"-policy || true
   aws iam delete-access-key --user-name "$user_name" \
-      --access-key-id $(cat "${state_dir}/creds/aws-key.json"| jq '.AccessKey.AccessKeyId' -r)
+      --access-key-id $(cat "${state_dir}/aws-key.json"| jq '.AccessKey.AccessKeyId' -r)
   aws iam delete-user --user-name "$user_name" ||true
-}
-
-
-after-add-virtualbox() {
-  cat <<EOF >"${state_dir}/tform.vars"
-export TF_VAR_prefix="${DIRECTOR}"
-EOF
-}
-
-after-remove-virtualbox() {
-  :
 }
 
 

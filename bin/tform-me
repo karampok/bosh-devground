@@ -21,22 +21,6 @@ execute() {
   after-"$action"-"$ENV_TYPE"
 }
 
-after-apply-virtualbox() {
-  arg1="-o ${bosh_deployment}/bosh-lite.yml"
-  arg2="-o ${bosh_deployment}/virtualbox/outbound-network.yml "
-  arg3="-o ${bosh_deployment}/bosh-lite-runc.yml"
-
-  cat <<EOF >${state_dir}/bosh/input.args
-export CPI_EXTRA_ARGS=" $arg1 $arg2 $arg3 "
-export CPI_external_ip=192.168.50.6
-export CPI_internal_ip=192.168.50.6
-export CPI_internal_gw=192.168.50.1
-export CPI_internal_cidr=192.168.50.0/24
-export CPI_dns_recursor_ip=192.168.50.6
-export CPI_outbound_network_name=NatNetwork
-EOF
-}
-
 after-destroy-aws() {
   rm -rf ${state_dir}/terraform
 }
