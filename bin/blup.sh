@@ -41,8 +41,8 @@ export BOSH_GW_USER=jumpbox
 export BOSH_GW_HOST="${CPI_external_ip}"
 export BOSH_GW_PRIVATE_KEY=${state_dir}/id_rsa_jumpbox
 export CREDHUB_SERVER="https://${CPI_external_ip}:8844"
-export CREDHUB_CLIENT=director_to_credhub
-export CREDHUB_SECRET=\$(bosh int ${state_dir}/bosh-vars.yml --path /uaa_clients_director_to_credhub)
+export CREDHUB_CLIENT=credhub-admin
+export CREDHUB_SECRET=\$(bosh int ${state_dir}/bosh-vars.yml --path /credhub_admin_client_secret)
 export CREDHUB_CA_CERT=\$(bosh int ${state_dir}/bosh-vars.yml --path /uaa_ssl/ca;bosh int ${state_dir}/bosh-vars.yml --path /credhub_tls/ca)
 #credhub login
 EOF
