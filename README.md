@@ -12,7 +12,7 @@ $ echo $?
 ```
 
 
-# Tutorial
+## Tutorial
 
 Simple execute the following script
 
@@ -28,7 +28,7 @@ and make sure that your workstation has the following
 # sudo echo "10.244.0.128 kubernetes" >> /etc/hosts
 ```
 
-## Access to the CFCR deployment
+### Access to the CFCR deployment
 
 Export the kubeconfig
 
@@ -42,7 +42,7 @@ $ kubectl get nodes
   > 10.244.0.131   Ready     <none>    1h        v1.8.4
 ```
 
-# Clean up 
+## Clean up 
 
 ```
 rm -rf $PWD/environments/bosh-lite
