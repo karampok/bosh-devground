@@ -1,12 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-state_dir="${ENV_DIR}/bosh-lite"
-mkdir -p "${state_dir}"
+state_dir="${ENV_DIR}/bosh-lite" && mkdir -p "${state_dir}"
 bosh_deployment=~/workspace/bosh-deployment
 
-export BOSH_LOG_LEVEL=debug
-export BOSH_LOG_PATH="$state_dir"/bosh-debug.log
 export CPI_external_ip=192.168.50.6
 export CPI_internal_ip=192.168.50.6
 export CPI_internal_gw=192.168.50.1
@@ -44,10 +41,10 @@ export BOSH_GW_USER=jumpbox
 export BOSH_GW_HOST="${CPI_external_ip}"
 export BOSH_GW_PRIVATE_KEY=${state_dir}/id_rsa_jumpbox
 export CREDHUB_SERVER="https://${CPI_external_ip}:8844"
-export CREDHUB_USER="credhub-cli"
-export CREDHUB_PASS=\$(bosh int ${state_dir}/bosh-vars.yml --path /credhub_cli_password)
+export CREDHUB_CLIENT=director_to_credhub
+export CREDHUB_SECRET=\$(bosh int ${state_dir}/bosh-vars.yml --path /uaa_clients_director_to_credhub)
 export CREDHUB_CA_CERT=\$(bosh int ${state_dir}/bosh-vars.yml --path /uaa_ssl/ca;bosh int ${state_dir}/bosh-vars.yml --path /credhub_tls/ca)
-#credhub login -u \$CREDHUB_USER -p \$CREDHUB_PASS
+#credhub login
 EOF
 
 echo "source ${state_dir}/bosh-envs"
