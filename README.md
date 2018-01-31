@@ -14,7 +14,7 @@ $ echo $?
 
 ## Tutorial
 
-Simple execute the following script
+Simply execute the following commands
 
 ```bash
  ./bin/blup.sh 
